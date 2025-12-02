@@ -1,18 +1,22 @@
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Union
-import sqlite3
+from typing import List, Optional
 import json
-from datetime import datetime
+from sqlalchemy.orm import Session
+from . import models, database
+
+# Create tables
+models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI()
 
 # CORS Configuration
 origins = [
-    "http://localhost:5173",  # Vite default
-    "http://localhost:3000",  # React default
-    "*" # Allow all for development convenience
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "*"
 ]
 
 app.add_middleware(
@@ -23,36 +27,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database Setup
-DB_NAME = "database.db"
-
-def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS products (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            sku TEXT,
-            category TEXT NOT NULL,
-            description TEXT,
-            images TEXT, -- JSON array of strings
-            video TEXT,
-            price REAL NOT NULL,
-            weight REAL,
-            purity TEXT,
-            stock INTEGER,
-            makingCharges REAL,
-            deletedAt TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-init_db()
-
 # Pydantic Models
-class Product(BaseModel):
+class ProductBase(BaseModel):
     id: str
     name: str
     sku: Optional[str] = None
@@ -67,111 +43,97 @@ class Product(BaseModel):
     makingCharges: Optional[float] = None
     deletedAt: Optional[str] = None
 
-# Helper to convert DB row to Product dict
-def row_to_product(row):
-    return {
-        "id": row[0],
-        "name": row[1],
-        "sku": row[2],
-        "category": row[3],
-        "description": row[4],
-        "images": json.loads(row[5]) if row[5] else [],
-        "video": row[6],
-        "price": row[7],
-        "weight": row[8],
-        "purity": row[9],
-        "stock": row[10],
-        "makingCharges": row[11],
-        "deletedAt": row[12]
-    }
+class ProductCreate(ProductBase):
+    pass
+
+class Product(ProductBase):
+    class Config:
+        orm_mode = True
+
+# Dependency
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @app.get("/products", response_model=List[Product])
-def get_products():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM products")
-    rows = cursor.fetchall()
-    conn.close()
-    return [row_to_product(row) for row in rows]
+def get_products(db: Session = Depends(get_db)):
+    products = db.query(models.Product).all()
+    # Convert images string back to list for Pydantic
+    for p in products:
+        if p.images:
+            p.images = json.loads(p.images)
+        else:
+            p.images = []
+    return products
 
 @app.post("/products", response_model=Product)
-def create_product(product: Product):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
-    # Check if exists
-    cursor.execute("SELECT id FROM products WHERE id = ?", (product.id,))
-    if cursor.fetchone():
-        conn.close()
+def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+    db_product = db.query(models.Product).filter(models.Product.id == product.id).first()
+    if db_product:
         raise HTTPException(status_code=400, detail="Product with this ID already exists")
-
-    cursor.execute('''
-        INSERT INTO products (id, name, sku, category, description, images, video, price, weight, purity, stock, makingCharges, deletedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (
-        product.id,
-        product.name,
-        product.sku,
-        product.category,
-        product.description,
-        json.dumps(product.images),
-        product.video,
-        product.price,
-        product.weight,
-        product.purity,
-        product.stock,
-        product.makingCharges,
-        product.deletedAt
-    ))
-    conn.commit()
-    conn.close()
-    return product
+    
+    new_product = models.Product(
+        id=product.id,
+        name=product.name,
+        sku=product.sku,
+        category=product.category,
+        description=product.description,
+        images=json.dumps(product.images), # Store as JSON string
+        video=product.video,
+        price=product.price,
+        weight=product.weight,
+        purity=product.purity,
+        stock=product.stock,
+        makingCharges=product.makingCharges,
+        deletedAt=product.deletedAt
+    )
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
+    
+    # Convert for response
+    new_product.images = json.loads(new_product.images)
+    return new_product
 
 @app.put("/products/{product_id}", response_model=Product)
-def update_product(product_id: str, product: Product):
+def update_product(product_id: str, product: ProductCreate, db: Session = Depends(get_db)):
     if product_id != product.id:
         raise HTTPException(status_code=400, detail="Product ID mismatch")
         
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT id FROM products WHERE id = ?", (product_id,))
-    if not cursor.fetchone():
-        conn.close()
+    db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    cursor.execute('''
-        UPDATE products SET
-            name = ?, sku = ?, category = ?, description = ?, images = ?, video = ?, 
-            price = ?, weight = ?, purity = ?, stock = ?, makingCharges = ?, deletedAt = ?
-        WHERE id = ?
-    ''', (
-        product.name,
-        product.sku,
-        product.category,
-        product.description,
-        json.dumps(product.images),
-        product.video,
-        product.price,
-        product.weight,
-        product.purity,
-        product.stock,
-        product.makingCharges,
-        product.deletedAt,
-        product_id
-    ))
-    conn.commit()
-    conn.close()
-    return product
+    db_product.name = product.name
+    db_product.sku = product.sku
+    db_product.category = product.category
+    db_product.description = product.description
+    db_product.images = json.dumps(product.images)
+    db_product.video = product.video
+    db_product.price = product.price
+    db_product.weight = product.weight
+    db_product.purity = product.purity
+    db_product.stock = product.stock
+    db_product.makingCharges = product.makingCharges
+    db_product.deletedAt = product.deletedAt
+
+    db.commit()
+    db.refresh(db_product)
+    
+    db_product.images = json.loads(db_product.images)
+    return db_product
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: str):
-    # Soft delete is handled by update, but if we want a hard delete endpoint:
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM products WHERE id = ?", (product_id,))
-    conn.commit()
-    conn.close()
+def delete_product(product_id: str, db: Session = Depends(get_db)):
+    db_product = db.query(models.Product).filter(models.Product.id == product_id).first()
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+        
+    db.delete(db_product)
+    db.commit()
     return {"message": "Product deleted successfully"}
 
 if __name__ == "__main__":
