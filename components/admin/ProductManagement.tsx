@@ -59,7 +59,7 @@ const ArchiveConfirmationModal: React.FC<ArchiveConfirmationModalProps> = ({
                 <p className="mb-6">
                     To confirm this action, please type "<strong className="font-mono">{CONFIRMATION_TEXT}</strong>" in the box below and enter your password.
                 </p>
-                
+
                 {error && <p className="bg-red-100 text-red-700 p-3 rounded-md mb-4 text-sm">{error}</p>}
 
                 <div className="space-y-4">
@@ -73,13 +73,14 @@ const ArchiveConfirmationModal: React.FC<ArchiveConfirmationModalProps> = ({
                             placeholder={CONFIRMATION_TEXT}
                         />
                     </div>
-                     <div>
+                    <div>
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">Your Password</label>
                         <input
                             type="password"
                             value={passwordInput}
                             onChange={(e) => setPasswordInput(e.target.value)}
                             className="p-3 border rounded bg-transparent dark:border-gray-600 w-full"
+                            aria-label="Your Password"
                         />
                     </div>
                 </div>
@@ -96,7 +97,7 @@ const ArchiveConfirmationModal: React.FC<ArchiveConfirmationModalProps> = ({
 
 // Product Form Component
 const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, categories, purities }: { product: Product | null, onSave: (product: Product) => void, onCancel: () => void, goldRates: GoldRates, calculatePrice: (product: Product, rates: GoldRates) => number, categories: string[], purities: string[] }) => {
-    
+
     const initialFormData = React.useMemo(() => {
         return product || {
             id: '',
@@ -161,7 +162,7 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
             const newPrice = calculatePrice(formData, goldRates);
             // Only update if calculation is valid to avoid resetting manual price to 0
             if (newPrice > 0) {
-                 setFormData(prev => ({ ...prev, price: Math.round(newPrice) }));
+                setFormData(prev => ({ ...prev, price: Math.round(newPrice) }));
             }
         }
     }, [formData.category, formData.weight, formData.purity, formData.makingCharges, goldRates, calculatePrice]);
@@ -169,7 +170,7 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         const isNumeric = ['price', 'weight', 'stock', 'makingCharges'].includes(name);
-        setFormData(prev => ({...prev, [name]: isNumeric ? Number(value) : value}));
+        setFormData(prev => ({ ...prev, [name]: isNumeric ? Number(value) : value }));
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,7 +208,7 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
             reader.onload = async (event) => {
                 // FIX: Ensure result is a string before proceeding to avoid potential type errors.
                 const videoDataUrl = event.target?.result;
-                if(typeof videoDataUrl === 'string'){
+                if (typeof videoDataUrl === 'string') {
                     setFormData(prev => ({ ...prev, video: videoDataUrl }));
                     const previewUrl = await generateVideoPreview(videoDataUrl);
                     setVideoPreview(previewUrl);
@@ -247,42 +248,42 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">Product Name</label>
-                        <input name="name" value={formData.name} onChange={handleChange} placeholder="e.g., Antique Gold Necklace" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full" required/>
+                        <input name="name" value={formData.name} onChange={handleChange} placeholder="e.g., Antique Gold Necklace" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full" required />
                     </div>
-                     <div>
+                    <div>
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">SKU</label>
-                        <input name="sku" value={formData.sku || ''} onChange={handleChange} placeholder="e.g., AJ-G-N-001" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full"/>
+                        <input name="sku" value={formData.sku || ''} onChange={handleChange} placeholder="e.g., AJ-G-N-001" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">Category</label>
-                        <select name="category" value={formData.category} onChange={handleChange} className="p-3 border rounded bg-white dark:bg-dark-bg dark:border-gray-600 w-full">
+                        <select name="category" value={formData.category} onChange={handleChange} className="p-3 border rounded bg-white dark:bg-dark-bg dark:border-gray-600 w-full" aria-label="Category">
                             {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">Stock Quantity</label>
-                        <input name="stock" type="number" value={formData.stock || 0} onChange={handleChange} placeholder="e.g., 10" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full"/>
+                        <input name="stock" type="number" value={formData.stock || 0} onChange={handleChange} placeholder="e.g., 10" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full" />
                     </div>
-                    
+
                     {formData.category === 'Gold' && (
                         <>
                             <div>
                                 <label className="block text-sm font-medium mb-1 dark:text-gray-300">Making Charges (%)</label>
-                                <input name="makingCharges" type="number" step="0.1" value={formData.makingCharges || ''} onChange={handleChange} placeholder="e.g., 15" className="p-3 border rounded w-full bg-transparent dark:border-gray-600" required/>
+                                <input name="makingCharges" type="number" step="0.1" value={formData.makingCharges || ''} onChange={handleChange} placeholder="e.g., 15" className="p-3 border rounded w-full bg-transparent dark:border-gray-600" required />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1 dark:text-gray-300">Weight (g)</label>
-                                <input name="weight" type="number" step="0.01" value={formData.weight || ''} onChange={handleChange} placeholder="e.g., 25.5" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full"/>
+                                <input name="weight" type="number" step="0.01" value={formData.weight || ''} onChange={handleChange} placeholder="e.g., 25.5" className="p-3 border rounded bg-transparent dark:border-gray-600 w-full" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1 dark:text-gray-300">Purity</label>
-                                <select name="purity" value={formData.purity} onChange={handleChange} className="p-3 border rounded bg-white dark:bg-dark-bg dark:border-gray-600 w-full">
+                                <select name="purity" value={formData.purity} onChange={handleChange} className="p-3 border rounded bg-white dark:bg-dark-bg dark:border-gray-600 w-full" aria-label="Purity">
                                     {purities.map(p => <option key={p} value={p}>{p}</option>)}
                                 </select>
                             </div>
                         </>
                     )}
-                    
+
                     <div className={formData.category === 'Gold' ? 'md:col-span-2' : ''}>
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">
                             {formData.category === 'Gold' ? 'Final Price (₹)' : 'Price (₹)'}
@@ -296,19 +297,19 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
                             className="p-3 border rounded w-full bg-transparent dark:border-gray-600 font-number"
                             required
                         />
-                         {formData.category === 'Gold' && (
+                        {formData.category === 'Gold' && (
                             <p className="text-xs text-gray-500 mt-1">This price is auto-calculated. You can manually override it.</p>
-                         )}
+                        )}
                     </div>
 
 
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-2 dark:text-gray-300">Product Images</label>
-                        <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-gold/20 file:text-dark-gold dark:file:text-primary-gold hover:file:bg-primary-gold/30"/>
+                        <input type="file" multiple accept="image/*" onChange={handleImageUpload} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-gold/20 file:text-dark-gold dark:file:text-primary-gold hover:file:bg-primary-gold/30" aria-label="Upload Product Images" />
                         <div className="flex gap-2 mt-2 flex-wrap">
                             {formData.images.map((img, index) => (
-                                <div 
-                                    key={img} 
+                                <div
+                                    key={img}
                                     className="relative group cursor-grab active:cursor-grabbing"
                                     draggable
                                     onDragStart={() => (dragItem.current = index)}
@@ -317,8 +318,11 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
                                     onDragOver={(e) => e.preventDefault()}
                                 >
                                     <div className="absolute top-0 left-0 p-1 bg-black/50 text-white text-xs font-bold rounded-br-md z-10 pointer-events-none group-active:hidden">{index + 1}</div>
-                                    <img src={img} alt={`preview ${index}`} className="w-20 h-20 object-cover rounded-md border dark:border-gray-700 pointer-events-none"/>
-                                    <button type="button" onClick={() => handleRemoveImage(index)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"><ion-icon name="close-outline"></ion-icon></button>
+                                    <img src={img} alt={`preview ${index}`} className="w-20 h-20 object-cover rounded-md border dark:border-gray-700 pointer-events-none" />
+                                    <button type="button" onClick={() => handleRemoveImage(index)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {/* @ts-ignore */}
+                                        <ion-icon name="close-outline"></ion-icon>
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -326,23 +330,25 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-2 dark:text-gray-300">Product Video (optional)</label>
                         {!formData.video && (
-                            <input 
-                                type="file" 
-                                accept="video/*" 
-                                onChange={handleVideoUpload} 
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={handleVideoUpload}
                                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-gold/20 file:text-dark-gold dark:file:text-primary-gold hover:file:bg-primary-gold/30"
+                                aria-label="Upload Product Video"
                             />
                         )}
                         {formData.video && (
-                           <div className="mt-2 relative">
+                            <div className="mt-2 relative">
                                 {videoPreview ? (
-                                     <img src={videoPreview} alt="Video preview" className="w-full max-w-xs h-auto rounded-md border dark:border-gray-700"/>
+                                    <img src={videoPreview} alt="Video preview" className="w-full max-w-xs h-auto rounded-md border dark:border-gray-700" />
                                 ) : (
                                     <div className="w-full max-w-xs h-40 bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center">
                                         <p className="text-gray-500">Generating preview...</p>
                                     </div>
                                 )}
                                 <button type="button" onClick={() => { setFormData(prev => ({ ...prev, video: undefined })); setVideoPreview(null); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs z-10">
+                                    {/* @ts-ignore */}
                                     <ion-icon name="close-outline"></ion-icon>
                                 </button>
                             </div>
@@ -350,7 +356,7 @@ const ProductForm = ({ product, onSave, onCancel, goldRates, calculatePrice, cat
                     </div>
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">Description</label>
-                        <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="p-3 border rounded bg-transparent w-full h-24 dark:border-gray-600" required/>
+                        <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="p-3 border rounded bg-transparent w-full h-24 dark:border-gray-600" required />
                     </div>
                 </div>
                 <div className="flex justify-end gap-4 mt-8">
@@ -384,7 +390,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
     const [showArchived, setShowArchived] = React.useState(false);
     const [productToArchive, setProductToArchive] = React.useState<Product | null>(null);
     const [isArchiveModalOpen, setIsArchiveModalOpen] = React.useState(false);
-    
+
     const handleEdit = (product: Product) => {
         setEditingProduct(product);
         setIsFormOpen(true);
@@ -399,7 +405,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
         if (editingProduct) {
             updateProduct(product);
         } else {
-            addProduct({...product, id: `prod_${Date.now()}`});
+            addProduct({ ...product, id: `prod_${Date.now()}` });
         }
         setIsFormOpen(false);
         setEditingProduct(null);
@@ -417,7 +423,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
         setIsArchiveModalOpen(false);
         setProductToArchive(null);
     };
-    
+
     const exportToJson = (data: Product[]) => {
         const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
         const link = document.createElement('a');
@@ -433,7 +439,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
         let csv = data.map(row => header.map(fieldName => JSON.stringify((row as any)[fieldName], replacer)).join(','));
         csv.unshift(header.join(','));
         const csvString = csv.join('\r\n');
-        
+
         const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
@@ -451,30 +457,33 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
                 <h2 className="text-xl font-bold">Manage Products</h2>
                 <div className="flex items-center gap-2 sm:gap-4">
                     <button onClick={() => exportToJson(products)} className="px-3 py-2 text-sm bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2">
+                        {/* @ts-ignore */}
                         <ion-icon name="code-download-outline"></ion-icon>
                         <span className="hidden sm:inline">Export JSON</span>
                     </button>
                     <button onClick={() => exportToCsv(products)} className="px-3 py-2 text-sm bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors flex items-center gap-2">
+                        {/* @ts-ignore */}
                         <ion-icon name="grid-outline"></ion-icon>
                         <span className="hidden sm:inline">Export CSV</span>
                     </button>
                     <button onClick={handleAddNew} className="px-4 py-2 bg-royal-gold text-black font-bold rounded-md hover:bg-dark-gold transition-colors flex items-center gap-2">
+                        {/* @ts-ignore */}
                         <ion-icon name="add-outline"></ion-icon>
                         Add New
                     </button>
                 </div>
             </div>
-            
+
             <div className="flex justify-end mb-4">
                 <div className="flex items-center">
                     <input type="checkbox" id="show-archived" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} className="h-4 w-4 rounded text-primary-gold focus:ring-primary-gold" />
                     <label htmlFor="show-archived" className="ml-2 text-sm font-medium">Show Archived</label>
                 </div>
             </div>
-             
+
             {isFormOpen && <ProductForm product={editingProduct} onSave={handleSave} onCancel={() => setIsFormOpen(false)} goldRates={goldRates} calculatePrice={calculatePrice} categories={categories} purities={purities} />}
             {isArchiveModalOpen && productToArchive && currentUser && (
-                <ArchiveConfirmationModal 
+                <ArchiveConfirmationModal
                     isOpen={isArchiveModalOpen}
                     productName={productToArchive.name}
                     onClose={() => setIsArchiveModalOpen(false)}
@@ -482,7 +491,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
                     userPasswordForVerification={currentUser.password}
                 />
             )}
-             
+
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
@@ -498,30 +507,42 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
                     </thead>
                     <tbody>
                         {products
-                          .filter(p => showArchived ? true : !p.deletedAt)
-                          .map(p => (
-                            <tr key={p.id} className={`border-b dark:border-gray-700 transition-colors ${p.deletedAt ? 'bg-gray-50 dark:bg-gray-800/50 opacity-60' : ''}`}>
-                                <td className="p-2"><img src={p.images[0]} alt={p.name} className="w-12 h-12 object-cover rounded-md"/></td>
-                                <td className="p-4 font-semibold">{p.name}</td>
-                                <td className="p-4">{p.category}</td>
-                                <td className="p-4 font-number">{calculatePrice(p, goldRates).toLocaleString('en-IN')}</td>
-                                <td className="p-4 font-number"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.stock && p.stock > 5 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{p.stock || 0}</span></td>
-                                <td className="p-4"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.deletedAt ? 'bg-gray-200 text-gray-800' : 'bg-green-100 text-green-800'}`}>{p.deletedAt ? 'Archived' : 'Active'}</span></td>
-                                <td className="p-4 flex gap-1">
-                                    {p.deletedAt ? (
-                                        <>
-                                            <button onClick={() => restoreProduct(p.id)} title="Restore" className="text-green-500 hover:text-green-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><ion-icon name="refresh-outline"></ion-icon></button>
-                                            <button onClick={() => permanentlyDeleteProduct(p.id)} title="Delete Permanently" className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><ion-icon name="trash-bin-outline"></ion-icon></button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button onClick={() => handleEdit(p)} title="Edit" className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><ion-icon name="create-outline"></ion-icon></button>
-                                            <button onClick={() => handleArchiveClick(p)} title="Archive" className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><ion-icon name="trash-outline"></ion-icon></button>
-                                        </>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
+                            .filter(p => showArchived ? true : !p.deletedAt)
+                            .map(p => (
+                                <tr key={p.id} className={`border-b dark:border-gray-700 transition-colors ${p.deletedAt ? 'bg-gray-50 dark:bg-gray-800/50 opacity-60' : ''}`}>
+                                    <td className="p-2"><img src={p.images[0]} alt={p.name} className="w-12 h-12 object-cover rounded-md" /></td>
+                                    <td className="p-4 font-semibold">{p.name}</td>
+                                    <td className="p-4">{p.category}</td>
+                                    <td className="p-4 font-number">{calculatePrice(p, goldRates).toLocaleString('en-IN')}</td>
+                                    <td className="p-4 font-number"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.stock && p.stock > 5 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{p.stock || 0}</span></td>
+                                    <td className="p-4"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.deletedAt ? 'bg-gray-200 text-gray-800' : 'bg-green-100 text-green-800'}`}>{p.deletedAt ? 'Archived' : 'Active'}</span></td>
+                                    <td className="p-4 flex gap-1">
+                                        {p.deletedAt ? (
+                                            <>
+                                                <button onClick={() => restoreProduct(p.id)} title="Restore" className="text-green-500 hover:text-green-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                    {/* @ts-ignore */}
+                                                    <ion-icon name="refresh-outline"></ion-icon>
+                                                </button>
+                                                <button onClick={() => permanentlyDeleteProduct(p.id)} title="Delete Permanently" className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                    {/* @ts-ignore */}
+                                                    <ion-icon name="trash-bin-outline"></ion-icon>
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => handleEdit(p)} title="Edit" className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                    {/* @ts-ignore */}
+                                                    <ion-icon name="create-outline"></ion-icon>
+                                                </button>
+                                                <button onClick={() => handleArchiveClick(p)} title="Archive" className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                                                    {/* @ts-ignore */}
+                                                    <ion-icon name="trash-outline"></ion-icon>
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
                     </tbody>
                 </table>
             </div>

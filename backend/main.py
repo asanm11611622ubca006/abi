@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import json
 from sqlalchemy.orm import Session
 try:
@@ -50,6 +50,19 @@ class ProductCreate(ProductBase):
     pass
 
 class Product(ProductBase):
+    class Config:
+        orm_mode = True
+
+class SettingsBase(BaseModel):
+    gold_rates: Dict[str, float]
+    silver_rate: float
+    hero_image: str
+    categories: List[str]
+    purities: List[str]
+    showcase_categories: List[Dict[str, Any]]
+
+class Settings(SettingsBase):
+    id: str
     class Config:
         orm_mode = True
 
@@ -138,6 +151,64 @@ def delete_product(product_id: str, db: Session = Depends(get_db)):
     db.delete(db_product)
     db.commit()
     return {"message": "Product deleted successfully"}
+
+@app.get("/settings", response_model=Settings)
+def get_settings(db: Session = Depends(get_db)):
+    settings = db.query(models.Settings).filter(models.Settings.id == 'app_settings').first()
+    if not settings:
+        # Return default settings if not found (or create them)
+        return Settings(
+            id='app_settings',
+            gold_rates={'22K': 6650, '24K': 7255},
+            silver_rate=95,
+            hero_image='https://picsum.photos/id/13/1920/1080',
+            categories=['Gold', 'Silver', 'Covering'],
+            purities=['24K', '22K', '92.5 Sterling'],
+            showcase_categories=[
+                {'name': 'Gold', 'image': 'https://images.unsplash.com/photo-1610375461490-67a3386e9ec0?q=80&w=300&auto=format&fit=crop'},
+                {'name': 'Silver', 'image': 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=300&auto=format&fit=crop'},
+                {'name': 'Covering', 'image': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=300&auto=format&fit=crop'}
+            ]
+        )
+    
+    # Parse JSON fields
+    return Settings(
+        id=settings.id,
+        gold_rates=json.loads(settings.gold_rates),
+        silver_rate=settings.silver_rate,
+        hero_image=settings.hero_image,
+        categories=json.loads(settings.categories),
+        purities=json.loads(settings.purities),
+        showcase_categories=json.loads(settings.showcase_categories)
+    )
+
+@app.put("/settings", response_model=Settings)
+def update_settings(settings: SettingsBase, db: Session = Depends(get_db)):
+    db_settings = db.query(models.Settings).filter(models.Settings.id == 'app_settings').first()
+    
+    if not db_settings:
+        db_settings = models.Settings(id='app_settings')
+        db.add(db_settings)
+    
+    db_settings.gold_rates = json.dumps(settings.gold_rates)
+    db_settings.silver_rate = settings.silver_rate
+    db_settings.hero_image = settings.hero_image
+    db_settings.categories = json.dumps(settings.categories)
+    db_settings.purities = json.dumps(settings.purities)
+    db_settings.showcase_categories = json.dumps(settings.showcase_categories)
+    
+    db.commit()
+    db.refresh(db_settings)
+    
+    return Settings(
+        id=db_settings.id,
+        gold_rates=json.loads(db_settings.gold_rates),
+        silver_rate=db_settings.silver_rate,
+        hero_image=db_settings.hero_image,
+        categories=json.loads(db_settings.categories),
+        purities=json.loads(db_settings.purities),
+        showcase_categories=json.loads(db_settings.showcase_categories)
+    )
 
 if __name__ == "__main__":
     import uvicorn

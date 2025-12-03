@@ -18,11 +18,20 @@ export const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
                         </p>
                         <div className="flex space-x-4 mt-6">
                             {/* FIX: Changed class to className */}
-                            <a href="#" className="hover:text-primary-gold transition-colors"><ion-icon name="logo-instagram" className="text-2xl"></ion-icon></a>
+                            <a href="#" className="hover:text-primary-gold transition-colors">
+                                {/* @ts-ignore */}
+                                <ion-icon name="logo-instagram" className="text-2xl"></ion-icon>
+                            </a>
                             {/* FIX: Changed class to className */}
-                            <a href="#" className="hover:text-primary-gold transition-colors"><ion-icon name="logo-facebook" className="text-2xl"></ion-icon></a>
+                            <a href="#" className="hover:text-primary-gold transition-colors">
+                                {/* @ts-ignore */}
+                                <ion-icon name="logo-facebook" className="text-2xl"></ion-icon>
+                            </a>
                             {/* FIX: Changed class to className */}
-                            <a href="https://wa.me/919003206991" target="_blank" rel="noopener noreferrer" className="hover:text-primary-gold transition-colors"><ion-icon name="logo-whatsapp" className="text-2xl"></ion-icon></a>
+                            <a href="https://wa.me/919003206991" target="_blank" rel="noopener noreferrer" className="hover:text-primary-gold transition-colors">
+                                {/* @ts-ignore */}
+                                <ion-icon name="logo-whatsapp" className="text-2xl"></ion-icon>
+                            </a>
                         </div>
                     </div>
 
@@ -39,11 +48,20 @@ export const Footer: React.FC<FooterProps> = ({ navigateTo }) => {
                         <h3 className="font-bold text-lg mb-4 tracking-wider">Contact Us</h3>
                         <ul className="space-y-2">
                             {/* FIX: Changed class to className */}
-                            <li className="flex items-center"><ion-icon name="location-outline" className="mr-2"></ion-icon> 4F Padmanaban Street, Kumbakonam - 612002</li>
+                            <li className="flex items-center">
+                                {/* @ts-ignore */}
+                                <ion-icon name="location-outline" className="mr-2"></ion-icon> 4F Padmanaban Street, Kumbakonam - 612002
+                            </li>
                             {/* FIX: Changed class to className */}
-                            <li className="flex items-center"><ion-icon name="call-outline" className="mr-2"></ion-icon> +91 9003206991</li>
+                            <li className="flex items-center">
+                                {/* @ts-ignore */}
+                                <ion-icon name="call-outline" className="mr-2"></ion-icon> +91 9003206991
+                            </li>
                             {/* FIX: Changed class to className */}
-                            <li className="flex items-center"><ion-icon name="mail-outline" className="mr-2"></ion-icon> abiramijewellery.mks@gmail.com</li>
+                            <li className="flex items-center">
+                                {/* @ts-ignore */}
+                                <ion-icon name="mail-outline" className="mr-2"></ion-icon> abiramijewellery.mks@gmail.com
+                            </li>
                         </ul>
                     </div>
                 </div>

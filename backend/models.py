@@ -20,3 +20,14 @@ class Product(Base):
     stock = Column(Integer, nullable=True)
     makingCharges = Column(Float, nullable=True)
     deletedAt = Column(String, nullable=True)
+
+class Settings(Base):
+    __tablename__ = "settings"
+
+    id = Column(String, primary_key=True, index=True) # Will be 'app_settings'
+    gold_rates = Column(Text, nullable=False) # JSON string
+    silver_rate = Column(Float, nullable=False)
+    hero_image = Column(Text, nullable=False)
+    categories = Column(Text, nullable=False) # JSON string
+    purities = Column(Text, nullable=False) # JSON string
+    showcase_categories = Column(Text, nullable=False) # JSON string

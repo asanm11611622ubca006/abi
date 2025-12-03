@@ -52,11 +52,11 @@ export const MyUploadsPage: React.FC<MyUploadsPageProps> = ({ currentUser, onAdd
             </div>
         );
     }
-    
+
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
             <h1 className="text-4xl font-bold font-heading mb-8 text-center text-light-text dark:text-dark-text">My Personal Gallery</h1>
-            
+
             <div className="max-w-xl mx-auto bg-white dark:bg-gray-900/50 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 mb-12">
                 <h2 className="text-xl font-bold font-heading mb-4">Upload a New Photo</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Your photos are saved locally in your browser and are only visible to you. Max file size: 5MB.</p>
@@ -66,6 +66,7 @@ export const MyUploadsPage: React.FC<MyUploadsPageProps> = ({ currentUser, onAdd
                     onChange={handleFileUpload}
                     disabled={isUploading}
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-gold/20 file:text-dark-gold dark:file:text-primary-gold hover:file:bg-primary-gold/30 cursor-pointer"
+                    aria-label="Upload a New Photo"
                 />
                 {isUploading && <p className="text-sm text-blue-500 mt-2 animate-pulse">Uploading...</p>}
                 {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
@@ -74,19 +75,20 @@ export const MyUploadsPage: React.FC<MyUploadsPageProps> = ({ currentUser, onAdd
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {(currentUser.uploads || []).map((imageData, index) => (
                     <div key={index} className="group relative bg-white dark:bg-gray-900/50 rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border border-gray-200 dark:border-gray-800">
-                        <img 
-                            src={imageData} 
-                            alt={`Uploaded by ${currentUser.name} - ${index}`} 
+                        <img
+                            src={imageData}
+                            alt={`Uploaded by ${currentUser.name} - ${index}`}
                             className="w-full h-64 object-cover"
                             loading="lazy"
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                             <button 
-                                onClick={() => onDeleteUpload(index)} 
+                            <button
+                                onClick={() => onDeleteUpload(index)}
                                 className="p-3 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors transform scale-90 group-hover:scale-100"
                                 aria-label="Delete image"
-                             >
+                            >
                                 {/* FIX: Replaced 'class' with 'className' to conform to JSX standards. */}
+                                {/* @ts-ignore */}
                                 <ion-icon name="trash-outline" className="text-2xl"></ion-icon>
                             </button>
                         </div>
@@ -97,6 +99,7 @@ export const MyUploadsPage: React.FC<MyUploadsPageProps> = ({ currentUser, onAdd
             {(currentUser.uploads || []).length === 0 && (
                 <div className="text-center py-16 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">
                     {/* FIX: Replaced 'class' with 'className' to conform to JSX standards. */}
+                    {/* @ts-ignore */}
                     <ion-icon name="images-outline" className="text-6xl text-gray-400 dark:text-gray-600 mx-auto"></ion-icon>
                     <p className="mt-4 text-lg text-gray-500 dark:text-gray-400">Your gallery is empty.</p>
                     <p className="text-sm text-gray-400 dark:text-gray-500">Upload your first photo to see it here!</p>

@@ -28,8 +28,9 @@ export const CompareBar: React.FC<CompareBarProps> = ({ compareList, onNavigate,
             <div className="flex items-center gap-2">
               {compareList.map(p => (
                 <div key={p.id} className="relative group">
-                  <img src={p.images[0]} alt={p.name} className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-md border-2 border-primary-gold"/>
-                   <button onClick={() => onRemove(p.id)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                  <img src={p.images[0]} alt={p.name} className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-md border-2 border-primary-gold" />
+                  <button onClick={() => onRemove(p.id)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* @ts-ignore */}
                     <ion-icon name="close-outline"></ion-icon>
                   </button>
                 </div>

@@ -13,23 +13,24 @@ export const GoldRateTicker: React.FC<GoldRateTickerProps> = ({ rates, silverRat
   return (
     <div className={`bg-gray-900 dark:bg-black text-white text-center py-3 transition-opacity duration-500 ${isDataReady ? 'opacity-100' : 'opacity-0'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-        <h3 className="font-bold text-lg text-primary-gold flex items-center">
-            <ion-icon name="flash-outline" className="mr-2"></ion-icon>
-            Live Rates
-        </h3>
+        <div className="flex items-center gap-2">
+          {/* @ts-ignore */}
+          <ion-icon name="trending-up" className="text-royal-gold text-xl"></ion-icon>
+          <span className="font-bold text-royal-gold uppercase tracking-wider text-sm sm:text-base">Today's Rates:</span>
+        </div>
         {isDataReady ? (
           <>
             <div className="font-semibold font-number">
-                <span className="text-gray-400 text-sm">24K (per gram): </span>
-                <span className="text-xl font-bold">₹{rates['24K'].toLocaleString('en-IN')}</span>
+              <span className="text-gray-400 text-sm">22K (per gram): </span>
+              <span className="text-xl font-bold">₹{rates['22K'].toLocaleString('en-IN')}</span>
             </div>
             <div className="font-semibold font-number">
-                <span className="text-gray-400 text-sm">22K (per gram): </span>
-                <span className="text-xl font-bold">₹{rates['22K'].toLocaleString('en-IN')}</span>
+              <span className="text-gray-400 text-sm">24K (per gram): </span>
+              <span className="text-xl font-bold">₹{rates['24K'].toLocaleString('en-IN')}</span>
             </div>
             <div className="font-semibold font-number">
-                <span className="text-gray-400 text-sm">Silver (per gram): </span>
-                <span className="text-xl font-bold">₹{silverRate.toLocaleString('en-IN')}</span>
+              <span className="text-gray-400 text-sm">Silver (per gram): </span>
+              <span className="text-xl font-bold">₹{silverRate.toLocaleString('en-IN')}</span>
             </div>
           </>
         ) : (

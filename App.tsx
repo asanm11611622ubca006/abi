@@ -68,16 +68,13 @@ const App: React.FC = () => {
     const [auditLog, setAuditLog] = React.useState<AuditLogEntry[]>(() => JSON.parse(localStorage.getItem('abirami_auditLog') || '[]'));
 
     // --- SETTINGS STATE ---
-    const [settings, setSettings] = React.useState(() => {
-        const savedSettings = localStorage.getItem('abirami_settings');
-        return savedSettings ? JSON.parse(savedSettings) : {
-            goldRates: { '22K': 6650, '24K': 7255 },
-            silverRate: 95,
-            heroImage: 'https://picsum.photos/id/13/1920/1080',
-            manageableCategories: ['Gold', 'Silver', 'Covering'],
-            manageablePurities: ['24K', '22K', '92.5 Sterling'],
-            showcaseCategories: INITIAL_SHOWCASE_CATEGORIES,
-        };
+    const [settings, setSettings] = React.useState({
+        goldRates: { '22K': 6650, '24K': 7255 },
+        silverRate: 95,
+        heroImage: 'https://picsum.photos/id/13/1920/1080',
+        manageableCategories: ['Gold', 'Silver', 'Covering'],
+        manageablePurities: ['24K', '22K', '92.5 Sterling'],
+        showcaseCategories: INITIAL_SHOWCASE_CATEGORIES,
     });
     const { goldRates, silverRate, heroImage, manageableCategories, manageablePurities, showcaseCategories } = settings;
 
@@ -103,13 +100,26 @@ const App: React.FC = () => {
         api.getProducts()
             .then(setProducts)
             .catch(err => console.error("Failed to load products", err));
+
+        api.getSettings()
+            .then(fetchedSettings => {
+                setSettings({
+                    goldRates: fetchedSettings.gold_rates,
+                    silverRate: fetchedSettings.silver_rate,
+                    heroImage: fetchedSettings.hero_image,
+                    manageableCategories: fetchedSettings.categories,
+                    manageablePurities: fetchedSettings.purities,
+                    showcaseCategories: fetchedSettings.showcase_categories
+                });
+            })
+            .catch(err => console.error("Failed to load settings", err));
     }, []);
     // React.useEffect(() => { localStorage.setItem('abirami_products', JSON.stringify(products)); }, [products]);
     React.useEffect(() => { localStorage.setItem('abirami_orders', JSON.stringify(orders)); }, [orders]);
     React.useEffect(() => { localStorage.setItem('abirami_customers', JSON.stringify(customers)); }, [customers]);
     React.useEffect(() => { localStorage.setItem('abirami_users', JSON.stringify(users)); }, [users]);
     React.useEffect(() => { localStorage.setItem('abirami_currentUser', JSON.stringify(currentUser)); }, [currentUser]);
-    React.useEffect(() => { localStorage.setItem('abirami_settings', JSON.stringify(settings)); }, [settings]);
+    // React.useEffect(() => { localStorage.setItem('abirami_settings', JSON.stringify(settings)); }, [settings]);
     React.useEffect(() => { localStorage.setItem('abirami_auditLog', JSON.stringify(auditLog)); }, [auditLog]);
     React.useEffect(() => { localStorage.setItem('abirami_compare', JSON.stringify(compareList)); }, [compareList]);
 
@@ -235,9 +245,26 @@ const App: React.FC = () => {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
         logAction('UPDATE', 'Order', orderId, `Set status to ${status}`);
     };
-    const saveSettings = (newSettings: Partial<typeof settings>) => {
-        setSettings(prev => ({ ...prev, ...newSettings }));
-        logAction('SETTINGS_UPDATE', 'Settings', 'app_settings', 'Updated application settings');
+    const saveSettings = async (newSettings: Partial<typeof settings>) => {
+        const previousSettings = { ...settings };
+        const updatedSettings = { ...settings, ...newSettings };
+        setSettings(updatedSettings);
+
+        try {
+            await api.updateSettings({
+                gold_rates: updatedSettings.goldRates,
+                silver_rate: updatedSettings.silverRate,
+                hero_image: updatedSettings.heroImage,
+                categories: updatedSettings.manageableCategories,
+                purities: updatedSettings.manageablePurities,
+                showcase_categories: updatedSettings.showcaseCategories
+            });
+            logAction('SETTINGS_UPDATE', 'Settings', 'app_settings', 'Updated application settings');
+        } catch (error) {
+            console.error("Failed to save settings", error);
+            setSettings(previousSettings); // Revert on failure
+            alert("Failed to save settings. Please check your connection or try a smaller image.");
+        }
     };
 
     // --- AUTHENTICATION HANDLERS ---
@@ -432,7 +459,7 @@ const App: React.FC = () => {
                     <div>
                         <img src={mainImage} alt={selectedProduct.name} className="w-full rounded-lg shadow-lg mb-4 h-96 object-cover" />
                         <div className="flex gap-2 flex-wrap">
-                            {selectedProduct.images.map((img, i) => <img key={i} src={img} onClick={() => setMainImage(img)} className={`w-20 h-20 object-cover rounded-md cursor-pointer border-2 ${mainImage === img ? 'border-primary-gold' : 'border-transparent'}`} />)}
+                            {selectedProduct.images.map((img, i) => <img key={i} src={img} onClick={() => setMainImage(img)} alt={`${selectedProduct.name} view ${i + 1}`} className={`w-20 h-20 object-cover rounded-md cursor-pointer border-2 ${mainImage === img ? 'border-primary-gold' : 'border-transparent'}`} />)}
                         </div>
                     </div>
                     <div>
@@ -448,16 +475,28 @@ const App: React.FC = () => {
                         </div>
                         <div className="mt-8 flex gap-4">
                             <button onClick={() => toggleWishlist(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${wishlist.includes(selectedProduct.id) ? 'bg-red-500 text-white border-red-500' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                <ion-icon name={wishlist.includes(selectedProduct.id) ? "heart" : "heart-outline"}></ion-icon>
+                                <button onClick={() => toggleWishlist(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${wishlist.includes(selectedProduct.id) ? 'bg-red-500 text-white border-red-500' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                                    {/* @ts-ignore */}
+                                    <ion-icon name={wishlist.includes(selectedProduct.id) ? "heart" : "heart-outline"}></ion-icon>
+                                    {wishlist.includes(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'}
+                                </button>
                                 {wishlist.includes(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'}
                             </button>
                             <button onClick={() => toggleCompare(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${compareList.includes(selectedProduct.id) ? 'bg-primary-gold text-white border-primary-gold' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                <ion-icon name={compareList.includes(selectedProduct.id) ? "git-compare" : "git-compare-outline"}></ion-icon>
+                                <button onClick={() => toggleCompare(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${compareList.includes(selectedProduct.id) ? 'bg-primary-gold text-white border-primary-gold' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                                    {/* @ts-ignore */}
+                                    <ion-icon name={compareList.includes(selectedProduct.id) ? "git-compare" : "git-compare-outline"}></ion-icon>
+                                    {compareList.includes(selectedProduct.id) ? 'In Compare' : 'Add to Compare'}
+                                </button>
                                 {compareList.includes(selectedProduct.id) ? 'In Compare' : 'Add to Compare'}
                             </button>
                         </div>
                         <a href={`https://wa.me/919003206991?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer" className="mt-4 w-full bg-green-500 text-white font-bold py-4 rounded-md flex items-center justify-center gap-2 hover:bg-green-600 transition-colors">
-                            <ion-icon name="logo-whatsapp"></ion-icon>
+                            <a href={`https://wa.me/919003206991?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer" className="mt-4 w-full bg-green-500 text-white font-bold py-4 rounded-md flex items-center justify-center gap-2 hover:bg-green-600 transition-colors">
+                                {/* @ts-ignore */}
+                                <ion-icon name="logo-whatsapp"></ion-icon>
+                                Buy on WhatsApp
+                            </a>
                             Buy on WhatsApp
                         </a>
                     </div>
@@ -494,8 +533,16 @@ const App: React.FC = () => {
         )
     };
 
-    const ComparePage = () => (<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8"> <h1 className="text-4xl font-bold font-heading mb-8 text-center">Compare Products</h1> {compareProducts.length > 0 ? (<div className="overflow-x-auto"> <table className="w-full text-left border-collapse"> <thead> <tr className="bg-gray-100 dark:bg-gray-800"> <th className="p-4 font-bold">Feature</th> {compareProducts.map(p => <th key={p.id} className="p-4 font-bold text-center"><img src={p.images[0]} className="w-24 h-24 mx-auto object-cover rounded-md" /></th>)} </tr> </thead> <tbody> {['name', 'category', 'purity', 'weight', 'price', 'stock'].map(feature => (<tr key={feature} className="border-b dark:border-gray-700"> <td className="p-4 font-semibold capitalize">{feature}</td> {compareProducts.map(p => (<td key={p.id} className="p-4 text-center font-number"> {feature === 'price' ? `₹${calculatePrice(p).toLocaleString()}` : p[feature as keyof Product] || '-'} </td>))} </tr>))} </tbody> </table> </div>) : <p className="text-center text-lg text-gray-500">Add products to compare.</p>} </div>);
-    const ContactPage = () => (<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12"> <h1 className="text-4xl font-bold font-heading mb-8 text-center">Contact Us</h1> <div className="grid grid-cols-1 md:grid-cols-2 gap-12"> <div> <h2 className="text-2xl font-bold font-heading mb-4">Get In Touch</h2> <p className="mb-4">We would love to hear from you. Visit our showroom or contact us with any inquiries.</p> <ul className="space-y-4 text-lg"> <li className="flex items-center gap-4"><ion-icon name="location" className="text-primary-gold text-2xl"></ion-icon>4F Padmanaban Street, Kumbakonam - 612002</li> <li className="flex items-center gap-4"><ion-icon name="call" className="text-primary-gold text-2xl"></ion-icon>+91 9003206991</li> <li className="flex items-center gap-4"><ion-icon name="mail" className="text-primary-gold text-2xl"></ion-icon>abiramijewellery.mks@gmail.com</li> <li className="flex items-center gap-4"><ion-icon name="time" className="text-primary-gold text-2xl"></ion-icon>Open: Mon - Sat, 10:00 AM - 9:00 PM</li> </ul> </div> <div> <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.920584852901!2d79.37581597587636!3d10.96906805562762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a55333503254555%3A0xf6519156b26f3750!2sAbirami%20Jewellery!5e0!3m2!1sen!2sin!4v1719584457635!5m2!1sen!2sin" width="100%" height="450" style={{ border: 0 }} allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="rounded-lg shadow-lg" ></iframe> </div> </div> </div>);
+    const ComparePage = () => (<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8"> <h1 className="text-4xl font-bold font-heading mb-8 text-center">Compare Products</h1> {compareProducts.length > 0 ? (<div className="overflow-x-auto"> <table className="w-full text-left border-collapse"> <thead> <tr className="bg-gray-100 dark:bg-gray-800"> <th className="p-4 font-bold">Feature</th> {compareProducts.map(p => <th key={p.id} className="p-4 font-bold text-center"><img src={p.images[0]} alt={p.name} className="w-24 h-24 mx-auto object-cover rounded-md" /></th>)} </tr> </thead> <tbody> {['name', 'category', 'purity', 'weight', 'price', 'stock'].map(feature => (<tr key={feature} className="border-b dark:border-gray-700"> <td className="p-4 font-semibold capitalize">{feature}</td> {compareProducts.map(p => (<td key={p.id} className="p-4 text-center font-number"> {feature === 'price' ? `₹${calculatePrice(p).toLocaleString()}` : p[feature as keyof Product] || '-'} </td>))} </tr>))} </tbody> </table> </div>) : <p className="text-center text-lg text-gray-500">Add products to compare.</p>} </div>);
+    const ContactPage = () => (<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12"> <h1 className="text-4xl font-bold font-heading mb-8 text-center">Contact Us</h1> <div className="grid grid-cols-1 md:grid-cols-2 gap-12"> <div> <h2 className="text-2xl font-bold font-heading mb-4">Get In Touch</h2> <p className="mb-4">We would love to hear from you. Visit our showroom or contact us with any inquiries.</p> <ul className="space-y-4 text-lg"> <li className="flex items-center gap-4">
+        {/* @ts-ignore */}
+        <ion-icon name="location" className="text-primary-gold text-2xl"></ion-icon>4F Padmanaban Street, Kumbakonam - 612002</li> <li className="flex items-center gap-4">
+            {/* @ts-ignore */}
+            <ion-icon name="call" className="text-primary-gold text-2xl"></ion-icon>+91 9003206991</li> <li className="flex items-center gap-4">
+            {/* @ts-ignore */}
+            <ion-icon name="mail" className="text-primary-gold text-2xl"></ion-icon>abiramijewellery.mks@gmail.com</li> <li className="flex items-center gap-4">
+            {/* @ts-ignore */}
+            <ion-icon name="time" className="text-primary-gold text-2xl"></ion-icon>Open: Mon - Sat, 10:00 AM - 9:00 PM</li> </ul> </div> <div> <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.920584852901!2d79.37581597587636!3d10.96906805562762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a55333503254555%3A0xf6519156b26f3750!2sAbirami%20Jewellery!5e0!3m2!1sen!2sin!4v1719584457635!5m2!1sen!2sin" width="100%" height="450" className="rounded-lg shadow-lg border-0" allowFullScreen={true} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Google Maps Location"></iframe> </div> </div> </div>);
 
     const AdminPortalPage = () => {
         const renderAdminPage = () => {
@@ -504,7 +551,7 @@ const App: React.FC = () => {
                 case 'products': return <ProductManagement products={products} addProduct={addProduct} updateProduct={updateProduct} deleteProduct={softDeleteProduct} restoreProduct={restoreProduct} permanentlyDeleteProduct={permanentlyDeleteProduct} goldRates={goldRates} calculatePrice={calculatePrice} categories={manageableCategories} purities={manageablePurities} currentUser={currentUser} />;
                 case 'orders': return <OrderManagement orders={orders} updateOrderStatus={updateOrderStatus} />;
                 case 'customers': return <CustomerManagement customers={customers} />;
-                case 'settings': return <Settings goldRates={goldRates} onGoldRatesChange={(r) => saveSettings({ goldRates: r })} silverRate={silverRate} onSilverRateChange={(r) => saveSettings({ silverRate: r })} heroImage={heroImage} onHeroImageChange={(i) => saveSettings({ heroImage: i })} categories={manageableCategories} onCategoriesChange={(c) => saveSettings({ categories: c })} purities={manageablePurities} onPuritiesChange={(p) => saveSettings({ purities: p })} showcaseCategories={showcaseCategories} onShowcaseCategoriesChange={(sc) => saveSettings({ showcaseCategories: sc })} />;
+                case 'settings': return <Settings goldRates={goldRates} onGoldRatesChange={(r) => saveSettings({ goldRates: r })} silverRate={silverRate} onSilverRateChange={(r) => saveSettings({ silverRate: r })} heroImage={heroImage} onHeroImageChange={(i) => saveSettings({ heroImage: i })} categories={manageableCategories} onCategoriesChange={(c) => saveSettings({ manageableCategories: c })} purities={manageablePurities} onPuritiesChange={(p) => saveSettings({ manageablePurities: p })} showcaseCategories={showcaseCategories} onShowcaseCategoriesChange={(sc) => saveSettings({ showcaseCategories: sc })} />;
                 case 'auditLog': return <AuditLogPage log={auditLog} />;
                 default: return <Dashboard products={products} orders={orders} />;
             }

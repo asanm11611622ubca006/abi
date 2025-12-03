@@ -10,6 +10,7 @@ interface DashboardProps {
 const StatCard: React.FC<{ title: string; value: string; icon: string; color: string; }> = ({ title, value, icon, color }) => (
     <div className="bg-white dark:bg-dark-bg p-6 rounded-lg shadow-md flex items-center">
         <div className={`p-4 rounded-full mr-4 ${color}`}>
+            {/* @ts-ignore */}
             <ion-icon name={icon} className="text-3xl text-white"></ion-icon>
         </div>
         <div>
@@ -23,7 +24,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ products, orders }) => {
     const activeProducts = products.filter(p => !p.deletedAt);
     const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
     const lowStockProducts = activeProducts.filter(p => (p.stock || 0) < 5).length;
-    
+
     return (
         <div className="space-y-8">
             {/* Stat Cards */}
@@ -49,7 +50,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ products, orders }) => {
                     <h3 className="font-bold text-lg mb-4">Recent Orders</h3>
                     <ul className="space-y-4">
                         {orders.slice(0, 5).map(order => (
-                             <li key={order.id} className="flex justify-between items-center">
+                            <li key={order.id} className="flex justify-between items-center">
                                 <div>
                                     <p className="font-semibold">{order.customerName}</p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(order.date).toLocaleDateString()}</p>

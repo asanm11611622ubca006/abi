@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ navigateTo, wishlistCount, compa
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
                     <div className="flex-shrink-0">
-                         <a onClick={() => navigateTo('home')} className="cursor-pointer text-2xl font-heading font-bold text-dark-gold dark:text-primary-gold">
+                        <a onClick={() => navigateTo('home')} className="cursor-pointer text-2xl font-heading font-bold text-dark-gold dark:text-primary-gold">
                             Abirami Jewellery
                         </a>
                     </div>
@@ -50,22 +50,26 @@ export const Header: React.FC<HeaderProps> = ({ navigateTo, wishlistCount, compa
                         </div>
 
                         <button onClick={() => navigateTo('wishlist')} className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+                            {/* @ts-ignore */}
                             <ion-icon name="heart-outline" className="text-2xl"></ion-icon>
                             {wishlistCount > 0 && <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">{wishlistCount}</span>}
                         </button>
 
                         <button onClick={() => navigateTo('compare')} className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+                            {/* @ts-ignore */}
                             <ion-icon name="git-compare-outline" className="text-2xl"></ion-icon>
                             {compareCount > 0 && <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">{compareCount}</span>}
                         </button>
-                        
+
                         <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+                            {/* @ts-ignore */}
                             <ion-icon name={isDarkMode ? 'sunny-outline' : 'moon-outline'} className="text-2xl"></ion-icon>
                         </button>
 
                         {currentUser ? (
                             <div className="relative group hidden md:block">
                                 <button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+                                    {/* @ts-ignore */}
                                     <ion-icon name="person-circle-outline" className="text-2xl"></ion-icon>
                                     <span className="font-semibold">{currentUser.name.split(' ')[0]}</span>
                                 </button>
@@ -83,6 +87,7 @@ export const Header: React.FC<HeaderProps> = ({ navigateTo, wishlistCount, compa
 
                         <div className="md:hidden">
                             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+                                {/* @ts-ignore */}
                                 <ion-icon name={isMenuOpen ? 'close-outline' : 'menu-outline'} className="text-2xl"></ion-icon>
                             </button>
                         </div>
@@ -93,7 +98,7 @@ export const Header: React.FC<HeaderProps> = ({ navigateTo, wishlistCount, compa
                     <div className="md:hidden pt-2 pb-4 space-y-2 flex flex-col items-center border-t border-gray-200 dark:border-gray-700">
                         {navLinks}
                         <div className="relative mt-2 w-full px-4">
-                             <input
+                            <input
                                 type="text"
                                 placeholder="Search..."
                                 onChange={(e) => onSearch(e.target.value)}
@@ -101,18 +106,18 @@ export const Header: React.FC<HeaderProps> = ({ navigateTo, wishlistCount, compa
                             />
                         </div>
                         <div className="pt-4 border-t border-gray-200 dark:border-gray-700 w-full flex flex-col items-center space-y-2 mt-2">
-                             {currentUser ? (
+                            {currentUser ? (
                                 <>
                                     <p className="font-semibold">Welcome, {currentUser.name}</p>
                                     <a onClick={() => { navigateTo('myUploads'); setIsMenuOpen(false); }} className="cursor-pointer hover:text-primary-gold transition-colors duration-300 w-full text-center">My Uploads</a>
                                     <a onClick={() => { onLogout(); setIsMenuOpen(false); }} className="cursor-pointer px-4 py-2 rounded-md bg-red-500 text-white w-full text-center">Logout</a>
                                 </>
-                             ) : (
+                            ) : (
                                 <>
                                     <a onClick={() => navigateTo('login')} className="cursor-pointer px-4 py-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 w-full text-center">Login</a>
                                     <a onClick={() => navigateTo('signup')} className="cursor-pointer px-4 py-2 rounded-md bg-primary-gold text-black font-bold w-full text-center">Sign Up</a>
                                 </>
-                             )}
+                            )}
                         </div>
                     </div>
                 )}

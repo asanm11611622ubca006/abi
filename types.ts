@@ -23,7 +23,7 @@ export interface Product {
   name: string;
   sku?: string;
   category: Category;
-  description:string;
+  description: string;
   images: string[];
   video?: string;
   price: number;
@@ -37,24 +37,24 @@ export interface Product {
 export type OrderStatus = 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
 
 export interface Order {
-    id: string;
-    customerName: string;
-    customerEmail: string;
-    date: string;
-    total: number;
-    status: OrderStatus;
-    items: { productId: string, quantity: number, name: string }[];
-    userId?: string;
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  date: string;
+  total: number;
+  status: OrderStatus;
+  items: { productId: string, quantity: number, name: string }[];
+  userId?: string;
 }
 
 export interface Customer {
-    id: string;
-    name: string;
-    email: string;
-    joinDate: string;
-    phone: string;
-    orderCount: number;
-    totalSpent: number;
+  id: string;
+  name: string;
+  email: string;
+  joinDate: string;
+  phone: string;
+  orderCount: number;
+  totalSpent: number;
 }
 
 export interface GoldRates {
@@ -75,4 +75,14 @@ export interface AuditLogEntry {
   entity: 'Product' | 'Order' | 'Customer' | 'Settings';
   entityId: string;
   details: string;
+}
+
+export interface AppSettings {
+  id: string;
+  gold_rates: GoldRates;
+  silver_rate: number;
+  hero_image: string;
+  categories: string[];
+  purities: string[];
+  showcase_categories: ShowcaseCategory[];
 }

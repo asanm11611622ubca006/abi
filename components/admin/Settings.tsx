@@ -38,18 +38,19 @@ const ManageList: React.FC<{ title: string, items: string[], setItems: (items: s
                 {items.map(item => (
                     <li key={item} className="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
                         <span>{item}</span>
-                        <button onClick={() => handleRemove(item)} className="text-red-500 hover:text-red-700">
+                        <button onClick={() => handleRemove(item)} className="text-red-500 hover:text-red-700" aria-label={`Remove ${item}`}>
+                            {/* @ts-ignore */}
                             <ion-icon name="trash-outline"></ion-icon>
                         </button>
                     </li>
                 ))}
             </ul>
             <div className="flex gap-2">
-                <input 
-                    type="text" 
-                    value={newItem} 
-                    onChange={(e) => setNewItem(e.target.value)} 
-                    placeholder={`New ${title.slice(7, -1)}`} 
+                <input
+                    type="text"
+                    value={newItem}
+                    onChange={(e) => setNewItem(e.target.value)}
+                    placeholder={`New ${title.slice(7, -1)}`}
                     className="flex-grow p-2 border rounded-md bg-transparent dark:border-gray-600"
                 />
                 <button onClick={handleAdd} className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600">Add</button>
@@ -88,20 +89,42 @@ export const Settings: React.FC<SettingsProps> = ({ goldRates, onGoldRatesChange
 
     const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setRates(prev => ({...prev, [name]: Number(value) }));
+        setRates(prev => ({ ...prev, [name]: Number(value) }));
     }
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (image: string) => void) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             const reader = new FileReader();
-            reader.onload = () => {
-                callback(reader.result as string);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Resize if too large (max 1200px width)
+                    const MAX_WIDTH = 1200;
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    // Compress to JPEG with 0.7 quality
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    callback(compressedDataUrl);
+                };
+                img.src = event.target?.result as string;
             };
             reader.readAsDataURL(file);
         }
     };
-    
+
     const handleShowcaseImageChange = (index: number, newImage: string) => {
         const updatedCategories = [...currentShowcaseCategories];
         updatedCategories[index] = { ...updatedCategories[index], image: newImage };
@@ -117,7 +140,7 @@ export const Settings: React.FC<SettingsProps> = ({ goldRates, onGoldRatesChange
         onShowcaseCategoriesChange(currentShowcaseCategories);
         alert('Settings saved!');
     };
-    
+
     return (
         <div className="bg-white dark:bg-dark-bg p-8 rounded-lg shadow-md max-w-2xl mx-auto space-y-12">
             {/* Store Info */}
@@ -126,19 +149,19 @@ export const Settings: React.FC<SettingsProps> = ({ goldRates, onGoldRatesChange
                 <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Store Name</label>
-                        <input type="text" name="name" value={storeInfo.name} onChange={handleInfoChange} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600" />
+                        <input type="text" name="name" value={storeInfo.name} onChange={handleInfoChange} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600" aria-label="Store Name" />
                     </div>
                 </div>
             </div>
 
-             {/* Homepage Customization */}
+            {/* Homepage Customization */}
             <div>
-                 <h2 className="text-xl font-bold mb-6">Homepage Customization</h2>
-                 <div className="space-y-6">
+                <h2 className="text-xl font-bold mb-6">Homepage Customization</h2>
+                <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Homepage Hero Image</label>
                         <img src={currentHeroImage} alt="Homepage Hero" className="w-full h-48 object-cover rounded-md mb-2 border dark:border-gray-700" />
-                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setCurrentHeroImage)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-gold/20 file:text-dark-gold dark:file:text-primary-gold hover:file:bg-primary-gold/30"/>
+                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setCurrentHeroImage)} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-gold/20 file:text-dark-gold dark:file:text-primary-gold hover:file:bg-primary-gold/30" aria-label="Upload Homepage Hero Image" />
                     </div>
                     <div>
                         <h3 className="text-lg font-bold mb-4">Homepage Category Images</h3>
@@ -148,46 +171,47 @@ export const Settings: React.FC<SettingsProps> = ({ goldRates, onGoldRatesChange
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{cat.name} Category Image</label>
                                     <div className="flex items-center gap-4">
                                         <img src={cat.image} alt={cat.name} className="w-24 h-24 object-cover rounded-full border-2 border-primary-gold" />
-                                        <input 
-                                            type="file" 
-                                            accept="image/*" 
+                                        <input
+                                            type="file"
+                                            accept="image/*"
                                             onChange={(e) => handleImageUpload(e, (newImg) => handleShowcaseImageChange(index, newImg))}
                                             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-gold/20 file:text-dark-gold dark:file:text-primary-gold hover:file:bg-primary-gold/30"
+                                            aria-label={`Upload ${cat.name} Image`}
                                         />
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
-                 </div>
+                </div>
             </div>
 
             {/* Live Rate Settings */}
             <div>
-                 <h2 className="text-xl font-bold mb-6">Live Rate Settings</h2>
-                 <div className="space-y-6">
+                <h2 className="text-xl font-bold mb-6">Live Rate Settings</h2>
+                <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">24K Gold Rate (per gram)</label>
-                        <input type="number" name="24K" value={rates['24K']} onChange={handleRateChange} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600 font-number" />
+                        <input type="number" name="24K" value={rates['24K']} onChange={handleRateChange} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600 font-number" aria-label="24K Gold Rate" />
                     </div>
-                     <div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">22K Gold Rate (per gram)</label>
-                        <input type="number" name="22K" value={rates['22K']} onChange={handleRateChange} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600 font-number" />
+                        <input type="number" name="22K" value={rates['22K']} onChange={handleRateChange} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600 font-number" aria-label="22K Gold Rate" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Silver Rate (per gram)</label>
-                        <input type="number" name="silverRate" value={currentSilverRate} onChange={(e) => setCurrentSilverRate(Number(e.target.value))} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600 font-number" />
+                        <input type="number" name="silverRate" value={currentSilverRate} onChange={(e) => setCurrentSilverRate(Number(e.target.value))} className="mt-1 block w-full p-3 border rounded-md bg-transparent dark:border-gray-600 font-number" aria-label="Silver Rate" />
                     </div>
-                 </div>
+                </div>
             </div>
 
             {/* Filter Management */}
             <div>
-                 <h2 className="text-xl font-bold mb-6">Filter Management</h2>
-                 <div className="space-y-8">
+                <h2 className="text-xl font-bold mb-6">Filter Management</h2>
+                <div className="space-y-8">
                     <ManageList title="Manage Categories" items={currentCategories} setItems={setCurrentCategories} />
                     <ManageList title="Manage Purities" items={currentPurities} setItems={setCurrentPurities} />
-                 </div>
+                </div>
             </div>
 
 
