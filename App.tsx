@@ -551,7 +551,7 @@ const App: React.FC = () => {
                 case 'products': return <ProductManagement products={products} addProduct={addProduct} updateProduct={updateProduct} deleteProduct={softDeleteProduct} restoreProduct={restoreProduct} permanentlyDeleteProduct={permanentlyDeleteProduct} goldRates={goldRates} calculatePrice={calculatePrice} categories={manageableCategories} purities={manageablePurities} currentUser={currentUser} />;
                 case 'orders': return <OrderManagement orders={orders} updateOrderStatus={updateOrderStatus} />;
                 case 'customers': return <CustomerManagement customers={customers} />;
-                case 'settings': return <Settings goldRates={goldRates} onGoldRatesChange={(r) => saveSettings({ goldRates: r })} silverRate={silverRate} onSilverRateChange={(r) => saveSettings({ silverRate: r })} heroImage={heroImage} onHeroImageChange={(i) => saveSettings({ heroImage: i })} categories={manageableCategories} onCategoriesChange={(c) => saveSettings({ manageableCategories: c })} purities={manageablePurities} onPuritiesChange={(p) => saveSettings({ manageablePurities: p })} showcaseCategories={showcaseCategories} onShowcaseCategoriesChange={(sc) => saveSettings({ showcaseCategories: sc })} />;
+                case 'settings': return <Settings goldRates={goldRates} silverRate={silverRate} heroImage={heroImage} categories={manageableCategories} purities={manageablePurities} showcaseCategories={showcaseCategories} onSave={(s) => saveSettings(s)} />;
                 case 'auditLog': return <AuditLogPage log={auditLog} />;
                 default: return <Dashboard products={products} orders={orders} />;
             }

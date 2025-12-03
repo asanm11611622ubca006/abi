@@ -4,17 +4,19 @@ import { GoldRates, ShowcaseCategory } from '../../types';
 
 interface SettingsProps {
     goldRates: GoldRates;
-    onGoldRatesChange: (rates: GoldRates) => void;
     silverRate: number;
-    onSilverRateChange: (rate: number) => void;
     heroImage: string;
-    onHeroImageChange: (image: string) => void;
     categories: string[];
-    onCategoriesChange: (categories: string[]) => void;
     purities: string[];
-    onPuritiesChange: (purities: string[]) => void;
     showcaseCategories: ShowcaseCategory[];
-    onShowcaseCategoriesChange: (categories: ShowcaseCategory[]) => void;
+    onSave: (settings: {
+        goldRates: GoldRates;
+        silverRate: number;
+        heroImage: string;
+        manageableCategories: string[];
+        manageablePurities: string[];
+        showcaseCategories: ShowcaseCategory[];
+    }) => void;
 }
 
 const ManageList: React.FC<{ title: string, items: string[], setItems: (items: string[]) => void }> = ({ title, items, setItems }) => {
@@ -60,7 +62,7 @@ const ManageList: React.FC<{ title: string, items: string[], setItems: (items: s
 }
 
 
-export const Settings: React.FC<SettingsProps> = ({ goldRates, onGoldRatesChange, silverRate, onSilverRateChange, heroImage, onHeroImageChange, categories, onCategoriesChange, purities, onPuritiesChange, showcaseCategories, onShowcaseCategoriesChange }) => {
+export const Settings: React.FC<SettingsProps> = ({ goldRates, silverRate, heroImage, categories, purities, showcaseCategories, onSave }) => {
     const [storeInfo, setStoreInfo] = React.useState({
         name: 'Abirami Jewellery',
         address: '4F Padmanaban Street, Kumbakonam - 612002',
@@ -132,12 +134,14 @@ export const Settings: React.FC<SettingsProps> = ({ goldRates, onGoldRatesChange
     };
 
     const handleSave = () => {
-        onGoldRatesChange(rates);
-        onSilverRateChange(currentSilverRate);
-        onHeroImageChange(currentHeroImage);
-        onCategoriesChange(currentCategories);
-        onPuritiesChange(currentPurities);
-        onShowcaseCategoriesChange(currentShowcaseCategories);
+        onSave({
+            goldRates: rates,
+            silverRate: currentSilverRate,
+            heroImage: currentHeroImage,
+            manageableCategories: currentCategories,
+            manageablePurities: currentPurities,
+            showcaseCategories: currentShowcaseCategories
+        });
         alert('Settings saved!');
     };
 
