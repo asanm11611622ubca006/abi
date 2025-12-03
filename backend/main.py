@@ -4,7 +4,10 @@ from pydantic import BaseModel
 from typing import List, Optional
 import json
 from sqlalchemy.orm import Session
-from . import models, database
+try:
+    from . import models, database
+except ImportError:
+    import models, database
 
 # Create tables
 models.Base.metadata.create_all(bind=database.engine)
