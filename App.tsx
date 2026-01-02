@@ -397,7 +397,7 @@ const App: React.FC = () => {
                             <div key={cat.name} onClick={() => { setFilters(f => ({ ...f, category: cat.name as Category })); navigateTo('products'); }} className="relative group rounded-full w-56 h-56 sm:w-64 sm:h-64 overflow-hidden cursor-pointer shadow-lg transition-all duration-300">
                                 <div style={{ backgroundImage: `url('${cat.image}')` }} className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"></div>
                                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 rounded-full"></div>
-                                <h3 className="relative z-10 flex items-center justify-center h-full text-3xl font-bold font-heading text-white transition-all duration-300 group-hover:[text-shadow:0_0_15px_#fff,0_0_25px_#fff]" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.7)' }}>{cat.name}</h3>
+                                <h3 className="relative z-10 flex items-center justify-center h-full text-3xl font-bold font-heading text-white transition-all duration-300 group-hover:[text-shadow:0_0_15px_#fff,0_0_25px_#fff] [text-shadow:2px_2px_4px_rgba(0,0,0,0.7)]">{cat.name}</h3>
                             </div>
                         ))}
                     </div>
@@ -475,28 +475,15 @@ const App: React.FC = () => {
                         </div>
                         <div className="mt-8 flex gap-4">
                             <button onClick={() => toggleWishlist(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${wishlist.includes(selectedProduct.id) ? 'bg-red-500 text-white border-red-500' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                <button onClick={() => toggleWishlist(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${wishlist.includes(selectedProduct.id) ? 'bg-red-500 text-white border-red-500' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                    {/* @ts-ignore */}
-                                    <ion-icon name={wishlist.includes(selectedProduct.id) ? "heart" : "heart-outline"}></ion-icon>
-                                    {wishlist.includes(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'}
-                                </button>
+                                {/* @ts-ignore */}
+                                <ion-icon name={wishlist.includes(selectedProduct.id) ? "heart" : "heart-outline"}></ion-icon>
                                 {wishlist.includes(selectedProduct.id) ? 'In Wishlist' : 'Add to Wishlist'}
                             </button>
-                            <button onClick={() => toggleCompare(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${compareList.includes(selectedProduct.id) ? 'bg-primary-gold text-white border-primary-gold' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                <button onClick={() => toggleCompare(selectedProduct)} className={`px-6 py-3 rounded-md font-bold flex items-center gap-2 border-2 transition-colors ${compareList.includes(selectedProduct.id) ? 'bg-primary-gold text-white border-primary-gold' : 'bg-transparent border-gray-400 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                                    {/* @ts-ignore */}
-                                    <ion-icon name={compareList.includes(selectedProduct.id) ? "git-compare" : "git-compare-outline"}></ion-icon>
-                                    {compareList.includes(selectedProduct.id) ? 'In Compare' : 'Add to Compare'}
-                                </button>
-                                {compareList.includes(selectedProduct.id) ? 'In Compare' : 'Add to Compare'}
-                            </button>
+
                         </div>
                         <a href={`https://wa.me/919003206991?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer" className="mt-4 w-full bg-green-500 text-white font-bold py-4 rounded-md flex items-center justify-center gap-2 hover:bg-green-600 transition-colors">
-                            <a href={`https://wa.me/919003206991?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer" className="mt-4 w-full bg-green-500 text-white font-bold py-4 rounded-md flex items-center justify-center gap-2 hover:bg-green-600 transition-colors">
-                                {/* @ts-ignore */}
-                                <ion-icon name="logo-whatsapp"></ion-icon>
-                                Buy on WhatsApp
-                            </a>
+                            {/* @ts-ignore */}
+                            <ion-icon name="logo-whatsapp"></ion-icon>
                             Buy on WhatsApp
                         </a>
                     </div>

@@ -32,14 +32,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, price, onView
             {/* @ts-ignore */}
             <ion-icon name={isInWishlist ? "heart" : "heart-outline"}></ion-icon>
           </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleCompare(product); }}
-            className={`p-2 rounded-full transition-colors duration-300 ${isInCompare ? 'bg-primary-gold text-white' : 'bg-white/80 text-gray-800 hover:bg-white'}`}
-            aria-label={isInCompare ? "Remove from Compare" : "Add to Compare"}
-          >
-            {/* @ts-ignore */}
-            <ion-icon name={isInCompare ? "git-compare" : "git-compare-outline"}></ion-icon>
-          </button>
         </div>
       </div>
       <div className="p-4 flex flex-col flex-grow text-light-text dark:text-dark-text">
